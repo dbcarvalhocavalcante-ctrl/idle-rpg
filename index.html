@@ -1,1 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <title>Idle RPG</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="game">
+
+        <h1>⚔️ Idle RPG</h1>
+
+        <div class="stats">
+            <span>💰 Ouro: <b id="gold">0</b></span>
+            <span>⭐ XP: <b id="xp">0</b></span>
+            <span>🏆 Nível: <b id="level">1</b></span>
+        </div>
+
+        <div class="battle">
+
+            <div class="character">
+                <div class="emoji">🧙</div>
+                <h2>Herói</h2>
+
+                <div class="bar">
+                    <div id="playerHealth" class="health"></div>
+                </div>
+
+                <p>
+                    ❤️ <span id="playerHp">100</span>/100
+                </p>
+            </div>
+
+            <div class="vs">
+                ⚔️
+            </div>
+
+            <div class="enemy">
+                <div class="emoji">👹</div>
+                <h2 id="enemyName">Goblin</h2>
+
+                <div class="bar">
+                    <div id="enemyHealth" class="health"></div>
+                </div>
+
+                <p>
+                    ❤️ <span id="enemyHp">50</span>/50
+                </p>
+            </div>
+
+        </div>
+
+        <div class="actions">
+            <button id="startButton">
+                ⚔️ Iniciar batalha
+            </button>
+        </div>
+
+        <div id="message" class="message">
+            Prepare-se para a batalha!
+        </div>
+
+    </div>
+
+    <script src="game.js"></script>
+
+</body>
+</html>
