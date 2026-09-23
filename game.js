@@ -30,39 +30,29 @@ const levelElement = document.getElementById("level");
 const playerHpElement = document.getElementById("playerHp");
 const enemyHpElement = document.getElementById("enemyHp");
 
-const playerHealthBar =
-    document.getElementById("playerHealth");
+const playerHealthBar = document.getElementById("playerHealth");
+const enemyHealthBar = document.getElementById("enemyHealth");
 
-const enemyHealthBar =
-    document.getElementById("enemyHealth");
+const messageElement = document.getElementById("message");
 
-const messageElement =
-    document.getElementById("message");
+const startButton = document.getElementById("startButton");
 
-const startButton =
-    document.getElementById("startButton");
-
-const enemyNameElement =
-    document.getElementById("enemyName");
+const enemyNameElement = document.getElementById("enemyName");
 
 
 // ==========================================
-// FASE NA INTERFACE
+// FASE
 // ==========================================
 
-const statsContainer =
-    document.querySelector(".stats");
+const statsContainer = document.querySelector(".stats");
 
-const phaseContainer =
-    document.createElement("span");
+const phaseContainer = document.createElement("span");
 
-phaseContainer.innerHTML =
-    "🗺️ Fase: <b id='phase'>1</b>";
+phaseContainer.innerHTML = "🗺️ Fase: <b id='phase'>1</b>";
 
 statsContainer.appendChild(phaseContainer);
 
-const phaseElement =
-    document.getElementById("phase");
+const phaseElement = document.getElementById("phase");
 
 
 // ==========================================
@@ -77,7 +67,6 @@ const enemyTypes = [
         baseGold: 10,
         baseXp: 20
     },
-
     {
         name: "Orc",
         baseHp: 80,
@@ -85,7 +74,6 @@ const enemyTypes = [
         baseGold: 18,
         baseXp: 35
     },
-
     {
         name: "Troll",
         baseHp: 120,
@@ -93,7 +81,6 @@ const enemyTypes = [
         baseGold: 30,
         baseXp: 50
     },
-
     {
         name: "Demônio",
         baseHp: 180,
@@ -112,30 +99,25 @@ function createEnemy() {
 
     const phase = player.phase;
 
-    const isBoss =
-        phase % 10 === 0;
+    const isBoss = phase % 10 === 0;
 
     if (isBoss) {
 
-        const hp =
-            Math.floor(
-                300 * Math.pow(1.18, phase / 10 - 1)
-            );
+        const hp = Math.floor(
+            300 * Math.pow(1.18, phase / 10 - 1)
+        );
 
-        const damage =
-            Math.floor(
-                25 * Math.pow(1.15, phase / 10 - 1)
-            );
+        const damage = Math.floor(
+            25 * Math.pow(1.15, phase / 10 - 1)
+        );
 
-        const gold =
-            Math.floor(
-                150 * Math.pow(1.20, phase / 10 - 1)
-            );
+        const gold = Math.floor(
+            150 * Math.pow(1.20, phase / 10 - 1)
+        );
 
-        const xp =
-            Math.floor(
-                250 * Math.pow(1.20, phase / 10 - 1)
-            );
+        const xp = Math.floor(
+            250 * Math.pow(1.20, phase / 10 - 1)
+        );
 
         enemy = {
             name: "👑 BOSS - Rei Demônio",
@@ -149,22 +131,21 @@ function createEnemy() {
 
     } else {
 
-        const index =
-            Math.min(
-                Math.floor((phase - 1) / 3),
-                enemyTypes.length - 1
-            );
+        const index = Math.min(
+            Math.floor((phase - 1) / 3),
+            enemyTypes.length - 1
+        );
 
-        const type =
-            enemyTypes[index];
+        const type = enemyTypes[index];
 
-        const multiplier =
-            Math.pow(1.12, phase - 1);
+        const multiplier = Math.pow(
+            1.12,
+            phase - 1
+        );
 
-        const hp =
-            Math.floor(
-                type.baseHp * multiplier
-            );
+        const hp = Math.floor(
+            type.baseHp * multiplier
+        );
 
         enemy = {
             name: type.name,
@@ -193,44 +174,35 @@ function createEnemy() {
 
 function updateScreen() {
 
-    goldElement.textContent =
-        Math.floor(player.gold);
+    if (!enemy) return;
 
-    xpElement.textContent =
-        Math.floor(player.xp);
+    goldElement.textContent = Math.floor(player.gold);
 
-    levelElement.textContent =
-        player.level;
+    xpElement.textContent = Math.floor(player.xp);
 
-    phaseElement.textContent =
-        player.phase;
+    levelElement.textContent = player.level;
+
+    phaseElement.textContent = player.phase;
 
     playerHpElement.textContent =
-        Math.max(
-            0,
-            Math.floor(player.hp)
-        );
+        Math.max(0, Math.floor(player.hp));
 
     enemyHpElement.textContent =
-        Math.max(
-            0,
-            Math.floor(enemy.hp)
-        );
+        Math.max(0, Math.floor(enemy.hp));
 
     playerHealthBar.style.width =
         Math.max(
             0,
-            player.hp / player.maxHp * 100
+            (player.hp / player.maxHp) * 100
         ) + "%";
 
     enemyHealthBar.style.width =
         Math.max(
             0,
-            enemy.hp / enemy.maxHp * 100
+            (enemy.hp / enemy.maxHp) * 100
         ) + "%";
 
-    enemyNameElement.textContent =
-        enemy.name;
+    enemyNameElement.textContent = enemy.name;
 }
 
 
@@ -243,10 +215,7 @@ function saveGame() {
     try {
 
         const saveData = {
-            player: {
-                ...player
-            },
-
+            player: player,
             savedAt: Date.now()
         };
 
@@ -257,10 +226,7 @@ function saveGame() {
 
     } catch (error) {
 
-        console.error(
-            "Erro ao salvar jogo:",
-            error
-        );
+        console.error("Erro ao salvar:", error);
     }
 }
 
@@ -273,50 +239,54 @@ function loadGame() {
 
     try {
 
-        const saved =
-            localStorage.getItem(SAVE_KEY);
+        const saved = localStorage.getItem(SAVE_KEY);
 
-        if (!saved) {
+        if (saved) {
 
-            createEnemy();
-            updateScreen();
+            const data = JSON.parse(saved);
 
-            return;
+            if (data.player) {
+
+                player = {
+                    ...player,
+                    ...data.player
+                };
+            }
         }
-
-        const saveData =
-            JSON.parse(saved);
-
-        if (saveData.player) {
-
-            player = {
-                ...player,
-                ...saveData.player
-            };
-        }
-
-        createEnemy();
-
-        updateScreen();
-
-        messageElement.textContent =
-            "💾 Progresso carregado!";
 
     } catch (error) {
 
-        console.error(
-            "Erro ao carregar jogo:",
-            error
-        );
+        console.error("Erro ao carregar:", error);
+    }
 
-        createEnemy();
-        updateScreen();
+    createEnemy();
+
+    messageElement.textContent =
+        savedExists()
+            ? "💾 Progresso carregado!"
+            : "Prepare-se para a batalha!";
+}
+
+
+// ==========================================
+// VERIFICAR SAVE
+// ==========================================
+
+function savedExists() {
+
+    try {
+
+        return localStorage.getItem(SAVE_KEY) !== null;
+
+    } catch (error) {
+
+        return false;
     }
 }
 
 
 // ==========================================
-// BATALHA
+// INICIAR BATALHA
 // ==========================================
 
 function startBattle() {
@@ -325,7 +295,13 @@ function startBattle() {
         return;
     }
 
+    if (!enemy) {
+        createEnemy();
+    }
+
     battleActive = true;
+
+    startButton.disabled = true;
 
     startButton.textContent =
         "⚔️ Lutando...";
@@ -333,28 +309,47 @@ function startBattle() {
     messageElement.textContent =
         "⚔️ A batalha começou!";
 
-    battleTimer =
-        setInterval(
-            battleRound,
-            1000
-        );
+    battleTimer = setInterval(
+        battleRound,
+        1000
+    );
 }
 
 
+// ==========================================
+// RODADA
+// ==========================================
+
 function battleRound() {
 
+    if (!battleActive || !enemy) {
+        return;
+    }
+
+    // HERÓI ATACA
     enemy.hp -= player.damage;
 
+    // INIMIGO MORRE
     if (enemy.hp <= 0) {
+
+        enemy.hp = 0;
+
+        updateScreen();
 
         enemyDefeated();
 
         return;
     }
 
+    // INIMIGO ATACA
     player.hp -= enemy.damage;
 
+    // HERÓI MORRE
     if (player.hp <= 0) {
+
+        player.hp = 0;
+
+        updateScreen();
 
         playerDefeated();
 
@@ -368,7 +363,6 @@ function battleRound() {
 
     updateScreen();
 
-    // SALVA A CADA ATAQUE
     saveGame();
 }
 
@@ -381,13 +375,13 @@ function enemyDefeated() {
 
     clearInterval(battleTimer);
 
+    battleTimer = null;
+
     battleActive = false;
 
-    player.gold +=
-        enemy.rewardGold;
+    player.gold += enemy.rewardGold;
 
-    player.xp +=
-        enemy.rewardXp;
+    player.xp += enemy.rewardXp;
 
     if (enemy.boss) {
 
@@ -410,17 +404,22 @@ function enemyDefeated() {
 
     player.phase++;
 
-    player.hp =
-        player.maxHp;
+    player.hp = player.maxHp;
 
-    // SALVA IMEDIATAMENTE
     saveGame();
 
     updateScreen();
 
-    setTimeout(() => {
+    startButton.textContent =
+        "⏳ Próxima batalha...";
+
+    startButton.disabled = true;
+
+    setTimeout(function () {
 
         createEnemy();
+
+        startButton.disabled = false;
 
         startButton.textContent =
             "⚔️ Próxima batalha";
@@ -430,20 +429,23 @@ function enemyDefeated() {
 
 
 // ==========================================
-// DERROTA DO JOGADOR
+// JOGADOR DERROTADO
 // ==========================================
 
 function playerDefeated() {
 
     clearInterval(battleTimer);
 
+    battleTimer = null;
+
     battleActive = false;
 
-    player.hp =
-        player.maxHp;
+    player.hp = player.maxHp;
 
     messageElement.textContent =
         "💀 Você foi derrotado!";
+
+    startButton.disabled = false;
 
     startButton.textContent =
         "🔄 Tentar novamente";
@@ -465,9 +467,7 @@ function checkLevelUp() {
 
     let leveledUp = false;
 
-    while (
-        player.xp >= requiredXp
-    ) {
+    while (player.xp >= requiredXp) {
 
         player.xp -= requiredXp;
 
@@ -477,8 +477,7 @@ function checkLevelUp() {
 
         player.damage += 5;
 
-        player.hp =
-            player.maxHp;
+        player.hp = player.maxHp;
 
         requiredXp =
             player.level * 100;
@@ -496,23 +495,21 @@ function checkLevelUp() {
 
 
 // ==========================================
-// SALVAR AO SAIR / IR PARA SEGUNDO PLANO
+// SALVAMENTO AUTOMÁTICO
 // ==========================================
 
 window.addEventListener(
     "beforeunload",
-    saveGame
+    function () {
+        saveGame();
+    }
 );
 
 document.addEventListener(
     "visibilitychange",
-    () => {
+    function () {
 
-        if (
-            document.visibilityState ===
-            "hidden"
-        ) {
-
+        if (document.visibilityState === "hidden") {
             saveGame();
         }
     }
@@ -523,14 +520,25 @@ document.addEventListener(
 // BOTÃO
 // ==========================================
 
-startButton.addEventListener(
-    "click",
-    startBattle
-);
+if (startButton) {
+
+    startButton.addEventListener(
+        "click",
+        function () {
+            startBattle();
+        }
+    );
+
+} else {
+
+    console.error(
+        "ERRO: botão startButton não encontrado."
+    );
+}
 
 
 // ==========================================
-// INICIAR
+// INICIAR JOGO
 // ==========================================
 
 loadGame();
