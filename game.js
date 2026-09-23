@@ -1,6 +1,13 @@
-const SAVE_KEY = "idleRPG_complete_v3";
+// ==========================================
+// IDLE RPG - GAME.JS
+// ==========================================
 
+const SAVE_KEY = "idleRPG_complete_v4";
 const OFFLINE_CAP = 8 * 60 * 60 * 1000;
+
+// ==========================================
+// JOGADOR
+// ==========================================
 
 let player = {
     level: 1,
@@ -26,24 +33,21 @@ let player = {
     inventory: []
 };
 
+// ==========================================
+// BATALHA
+// ==========================================
+
 let enemy = null;
-
 let battleActive = false;
-
 let battleTimer = null;
 
-let lastSaved = Date.now();
-
-
 // ==========================================
-// ELEMENTOS
+// ELEMENTOS HTML
 // ==========================================
 
-const $ = id =>
-    document.getElementById(id);
+const $ = id => document.getElementById(id);
 
 const els = {
-
     gold: $("gold"),
     xp: $("xp"),
     level: $("level"),
@@ -84,6 +88,24 @@ const els = {
     ringName: $("ringName")
 };
 
+// ==========================================
+// VERIFICAR HTML
+// ==========================================
+
+function checkElements() {
+
+    for (const key in els) {
+
+        if (!els[key]) {
+            console.error(
+                "Elemento HTML não encontrado:",
+                key
+            );
+        }
+
+    }
+
+}
 
 // ==========================================
 // INIMIGOS
@@ -129,7 +151,6 @@ const enemies = [
 
 ];
 
-
 // ==========================================
 // ITENS
 // ==========================================
@@ -143,6 +164,7 @@ const items = [
         rarity: "common",
         icon: "⚔️",
         damage: 5,
+        defense: 0,
         price: 50
     },
 
@@ -152,6 +174,7 @@ const items = [
         slot: "armor",
         rarity: "common",
         icon: "🛡️",
+        damage: 0,
         defense: 3,
         price: 60
     },
@@ -163,6 +186,7 @@ const items = [
         rarity: "rare",
         icon: "💍",
         damage: 8,
+        defense: 0,
         price: 100
     },
 
@@ -173,6 +197,7 @@ const items = [
         rarity: "epic",
         icon: "🗡️",
         damage: 18,
+        defense: 0,
         price: 250
     },
 
@@ -182,6 +207,7 @@ const items = [
         slot: "armor",
         rarity: "epic",
         icon: "🛡️",
+        damage: 0,
         defense: 12,
         price: 300
     },
@@ -193,14 +219,14 @@ const items = [
         rarity: "legendary",
         icon: "💍",
         damage: 30,
+        defense: 0,
         price: 600
     }
 
 ];
 
-
 // ==========================================
-// XP
+// XP NECESSÁRIO
 // ==========================================
 
 function xpNeed() {
@@ -209,7 +235,6 @@ function xpNeed() {
 
 }
 
-
 // ==========================================
 // BÔNUS DOS EQUIPAMENTOS
 // ==========================================
@@ -217,21 +242,28 @@ function xpNeed() {
 function bonuses() {
 
     let damage = 10;
-
     let defense = 0;
 
     for (
-        const id of Object.values(player.equipment)
+        const slot of
+        ["weapon", "armor", "ring"]
     ) {
 
+        const id =
+            player.equipment[slot];
+
         const item =
-            items.find(x => x.id === id);
+            items.find(
+                x => x.id === id
+            );
 
         if (item) {
 
-            damage += item.damage || 0;
+            damage +=
+                item.damage || 0;
 
-            defense += item.defense || 0;
+            defense +=
+                item.defense || 0;
 
         }
 
@@ -244,25 +276,29 @@ function bonuses() {
 
 }
 
-
 // ==========================================
 // CRIAR INIMIGO
 // ==========================================
 
 function createEnemy() {
 
-    const boss =
+    const isBoss =
         player.phase % 10 === 0;
 
-    if (boss) {
+    if (isBoss) {
 
-        const n =
-            Math.floor(player.phase / 10);
+        const bossLevel =
+            Math.floor(
+                player.phase / 10
+            );
 
         const hp =
             Math.floor(
                 300 *
-                Math.pow(1.18, n - 1)
+                Math.pow(
+                    1.18,
+                    bossLevel - 1
+                )
             );
 
         enemy = {
@@ -278,19 +314,28 @@ function createEnemy() {
             damage:
                 Math.floor(
                     25 *
-                    Math.pow(1.15, n - 1)
+                    Math.pow(
+                        1.15,
+                        bossLevel - 1
+                    )
                 ),
 
             rewardGold:
                 Math.floor(
                     150 *
-                    Math.pow(1.2, n - 1)
+                    Math.pow(
+                        1.20,
+                        bossLevel - 1
+                    )
                 ),
 
             rewardXp:
                 Math.floor(
                     250 *
-                    Math.pow(1.2, n - 1)
+                    Math.pow(
+                        1.20,
+                        bossLevel - 1
+                    )
                 ),
 
             boss: true
@@ -299,15 +344,16 @@ function createEnemy() {
 
     } else {
 
+        const index =
+            Math.min(
+                Math.floor(
+                    (player.phase - 1) / 3
+                ),
+                enemies.length - 1
+            );
+
         const type =
-            enemies[
-                Math.min(
-                    Math.floor(
-                        (player.phase - 1) / 3
-                    ),
-                    enemies.length - 1
-                )
-            ];
+            enemies[index];
 
         const multiplier =
             Math.pow(
@@ -358,15 +404,17 @@ function createEnemy() {
 
 }
 
-
 // ==========================================
 // ATUALIZAR TELA
 // ==========================================
 
 function update() {
 
-    const b =
-        bonuses();
+    if (!els.gold) {
+        return;
+    }
+
+    const b = bonuses();
 
     player.damage =
         b.damage;
@@ -374,6 +422,7 @@ function update() {
     player.defense =
         b.defense;
 
+    // STATUS
 
     els.gold.textContent =
         Math.floor(player.gold);
@@ -387,30 +436,41 @@ function update() {
     els.phase.textContent =
         player.phase;
 
-
     els.damage.textContent =
         player.damage;
 
     els.defense.textContent =
         player.defense;
 
+    // VIDA DO HERÓI
 
-    els.playerHp.textContent =
+    const currentHp =
         Math.max(
             0,
             Math.floor(player.hp)
         );
 
+    els.playerHp.textContent =
+        currentHp;
+
     els.playerMaxHp.textContent =
         player.maxHp;
 
-
     els.heroHpText.textContent =
-        `${Math.max(
-            0,
-            Math.floor(player.hp)
-        )}/${player.maxHp}`;
+        `${currentHp}/${player.maxHp}`;
 
+    els.playerHealth.style.width =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                player.hp /
+                player.maxHp *
+                100
+            )
+        ) + "%";
+
+    // INIMIGO
 
     if (enemy) {
 
@@ -431,46 +491,49 @@ function update() {
         els.enemyEmoji.textContent =
             enemy.emoji;
 
-
-        els.playerHealth.style.width =
-            Math.max(
-                0,
-                player.hp /
-                player.maxHp *
-                100
-            ) + "%";
-
-
         els.enemyHealth.style.width =
             Math.max(
                 0,
-                enemy.hp /
-                enemy.maxHp *
-                100
+                Math.min(
+                    100,
+                    enemy.hp /
+                    enemy.maxHp *
+                    100
+                )
             ) + "%";
 
     }
 
+    // XP
 
-    els.xpBar.style.width =
+    const needed =
+        xpNeed();
+
+    const percent =
         Math.min(
             100,
             player.xp /
-            xpNeed() *
+            needed *
             100
-        ) + "%";
+        );
 
+    els.xpBar.style.width =
+        percent + "%";
 
     els.xpNeeded.textContent =
-        xpNeed() -
-        player.xp;
+        Math.max(
+            0,
+            needed - player.xp
+        );
 
+    // AUTO
 
     els.auto.textContent =
         player.auto
             ? "🤖 Auto: ON"
             : "🤖 Auto: OFF";
 
+    // EQUIPAMENTOS
 
     for (
         const slot of
@@ -491,13 +554,10 @@ function update() {
 
     }
 
-
     renderInventory();
-
     renderShop();
 
 }
-
 
 // ==========================================
 // SALVAR
@@ -507,18 +567,15 @@ function save() {
 
     try {
 
-        lastSaved =
-            Date.now();
-
         localStorage.setItem(
 
             SAVE_KEY,
 
             JSON.stringify({
 
-                player,
+                player: player,
 
-                savedAt: lastSaved
+                savedAt: Date.now()
 
             })
 
@@ -526,12 +583,14 @@ function save() {
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Erro ao salvar:",
+            error
+        );
 
     }
 
 }
-
 
 // ==========================================
 // CARREGAR
@@ -579,35 +638,35 @@ function load() {
 
                 };
 
+                // RECOMPENSA OFFLINE
 
-                const elapsed = Math.min(
+                const savedAt =
+                    data.savedAt ||
+                    Date.now();
 
-                    OFFLINE_CAP,
+                const elapsed =
+                    Math.min(
+                        OFFLINE_CAP,
+                        Math.max(
+                            0,
+                            Date.now() -
+                            savedAt
+                        )
+                    );
 
-                    Math.max(
-
-                        0,
-
-                        Date.now() -
-                        (data.savedAt ||
-                         Date.now())
-
-                    )
-
-                );
-
-
-                if (elapsed > 60000) {
+                if (
+                    elapsed >
+                    60000
+                ) {
 
                     const minutes =
                         Math.floor(
-                            elapsed / 60000
+                            elapsed /
+                            60000
                         );
 
                     const gold =
-                        Math.floor(
-                            minutes * 2
-                        );
+                        minutes * 2;
 
                     player.gold +=
                         gold;
@@ -624,18 +683,27 @@ function load() {
 
             }
 
+        } else {
+
+            els.offline.textContent =
+                "Novo jogo iniciado!";
+
         }
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Erro ao carregar:",
+            error
+        );
 
     }
 
+    // CORRIGIR VIDA
 
     if (
-        player.hp >
-        player.maxHp
+        player.hp <= 0 ||
+        player.hp > player.maxHp
     ) {
 
         player.hp =
@@ -643,11 +711,37 @@ function load() {
 
     }
 
+    // GARANTIR ESTRUTURA
+
+    if (
+        !player.equipment
+    ) {
+
+        player.equipment = {
+            weapon: null,
+            armor: null,
+            ring: null
+        };
+
+    }
+
+    if (
+        !Array.isArray(
+            player.inventory
+        )
+    ) {
+
+        player.inventory = [];
+
+    }
+
+    // CRIAR PRIMEIRO INIMIGO
 
     createEnemy();
 
-}
+    update();
 
+}
 
 // ==========================================
 // INICIAR BATALHA
@@ -655,28 +749,57 @@ function load() {
 
 function startBattle() {
 
-    if (battleActive) {
+    // Não iniciar duas vezes
 
+    if (battleActive) {
         return;
+    }
+
+    // Se não existir inimigo,
+    // cria um novo
+
+    if (
+        !enemy ||
+        enemy.hp <= 0
+    ) {
+
+        createEnemy();
 
     }
 
+    // GARANTIR VIDA
+
+    if (
+        player.hp <= 0
+    ) {
+
+        player.hp =
+            player.maxHp;
+
+    }
 
     battleActive =
         true;
 
-
     els.start.disabled =
         true;
-
 
     els.start.textContent =
         "⚔️ Lutando...";
 
-
     els.message.textContent =
         "⚔️ A batalha começou!";
 
+    // SEGURANÇA:
+    // impedir intervalos duplicados
+
+    if (battleTimer) {
+
+        clearInterval(
+            battleTimer
+        );
+
+    }
 
     battleTimer =
         setInterval(
@@ -686,25 +809,44 @@ function startBattle() {
 
 }
 
-
 // ==========================================
-// RODADA
+// RODADA DE BATALHA
 // ==========================================
 
 function round() {
 
-    if (!battleActive) {
+    if (
+        !battleActive
+    ) {
 
         return;
 
     }
 
+    // SEGURANÇA
+
+    if (!enemy) {
+
+        createEnemy();
+
+        return;
+
+    }
+
+    // ATAQUE DO JOGADOR
 
     enemy.hp -=
         player.damage;
 
+    // INIMIGO MORREU
 
-    if (enemy.hp <= 0) {
+    if (
+        enemy.hp <= 0
+    ) {
+
+        enemy.hp = 0;
+
+        update();
 
         win();
 
@@ -712,6 +854,7 @@ function round() {
 
     }
 
+    // ATAQUE DO INIMIGO
 
     const received =
         Math.max(
@@ -720,12 +863,18 @@ function round() {
             player.defense
         );
 
-
     player.hp -=
         received;
 
+    // HERÓI MORREU
 
-    if (player.hp <= 0) {
+    if (
+        player.hp <= 0
+    ) {
+
+        player.hp = 0;
+
+        update();
 
         lose();
 
@@ -733,17 +882,16 @@ function round() {
 
     }
 
+    // MENSAGEM
 
     els.message.textContent =
-        `⚔️ Você causou ${player.damage} e recebeu ${received} de dano.`;
-
+        `⚔️ Você causou ${player.damage} de dano e recebeu ${received}.`;
 
     update();
 
     save();
 
 }
-
 
 // ==========================================
 // VITÓRIA
@@ -761,516 +909,43 @@ function win() {
     battleActive =
         false;
 
+    // RECOMPENSAS
 
     player.gold +=
         enemy.rewardGold;
 
-
     player.xp +=
         enemy.rewardXp;
 
+    let message =
+        `🎉 ${enemy.boss ? "BOSS " : ""}${enemy.name} derrotado! ` +
+        `+${enemy.rewardGold} ouro, ` +
+        `+${enemy.rewardXp} XP.`;
 
-    let text =
-        `🎉 ${
-            enemy.boss
-                ? "BOSS "
-                : ""
-        }${enemy.name} derrotado! +${
-            enemy.rewardGold
-        } ouro, +${
-            enemy.rewardXp
-        } XP.`;
+    // LEVEL UP
 
+    const oldLevel =
+        player.level;
 
     checkLevel();
 
+    if (
+        player.level >
+        oldLevel
+    ) {
+
+        message +=
+            ` 🆙 Nível ${player.level}!`;
+
+    }
+
+    // PRÓXIMA FASE
 
     player.phase++;
 
+    // RECUPERAR VIDA
 
     player.hp =
         player.maxHp;
 
-
-    const drop =
-        dropItem();
-
-
-    if (drop) {
-
-        player.inventory.push(
-            drop.id
-        );
-
-        text +=
-            ` 🎁 Drop: ${drop.name}!`;
-
-    }
-
-
-    els.message.textContent =
-        text;
-
-
-    save();
-
-    update();
-
-
-    els.start.textContent =
-        "⏳ Próxima batalha...";
-
-
-    setTimeout(
-        () => {
-
-            createEnemy();
-
-            els.start.disabled =
-                false;
-
-            els.start.textContent =
-                "⚔️ Próxima batalha";
-
-
-            if (player.auto) {
-
-                startBattle();
-
-            }
-
-        },
-        900
-    );
-
-}
-
-
-// ==========================================
-// DERROTA
-// ==========================================
-
-function lose() {
-
-    clearInterval(
-        battleTimer
-    );
-
-    battleTimer =
-        null;
-
-    battleActive =
-        false;
-
-
-    player.hp =
-        player.maxHp;
-
-
-    els.message.textContent =
-        "💀 Você foi derrotado!";
-
-
-    els.start.disabled =
-        false;
-
-
-    els.start.textContent =
-        "🔄 Tentar novamente";
-
-
-    save();
-
-    update();
-
-}
-
-
-// ==========================================
-// LEVEL UP
-// ==========================================
-
-function checkLevel() {
-
-    while (
-        player.xp >=
-        xpNeed()
-    ) {
-
-        player.xp -=
-            xpNeed();
-
-
-        player.level++;
-
-
-        player.maxHp +=
-            20;
-
-
-        player.hp =
-            player.maxHp;
-
-    }
-
-}
-
-
-// ==========================================
-// DROP
-// ==========================================
-
-function dropItem() {
-
-    const chance =
-        Math.random();
-
-
-    if (chance > 0.28) {
-
-        return null;
-
-    }
-
-
-    const pool =
-        items.filter(
-            i =>
-                i.price <=
-                Math.max(
-                    100,
-                    player.phase * 50
-                )
-        );
-
-
-    return pool[
-        Math.floor(
-            Math.random() *
-            pool.length
-        )
-    ] || null;
-
-}
-
-
-// ==========================================
-// INVENTÁRIO
-// ==========================================
-
-function renderInventory() {
-
-    if (
-        !player.inventory.length
-    ) {
-
-        els.inventory.innerHTML =
-            "<div class='item'>Seu inventário está vazio.</div>";
-
-        return;
-
-    }
-
-
-    els.inventory.innerHTML =
-        player.inventory
-            .map(
-                (id, index) => {
-
-                    const item =
-                        items.find(
-                            x =>
-                                x.id ===
-                                id
-                        );
-
-
-                    if (!item) {
-
-                        return "";
-
-                    }
-
-
-                    const equipped =
-                        player.equipment[
-                            item.slot
-                        ] ===
-                        item.id;
-
-
-                    return `
-
-                    <div class="item ${item.rarity}">
-
-                        ${item.icon}
-
-                        <b>${item.name}</b>
-
-                        <br>
-
-                        <small>
-
-                            ${
-                                item.damage
-                                    ? `+${item.damage} ataque `
-                                    : ""
-                            }
-
-                            ${
-                                item.defense
-                                    ? `+${item.defense} defesa`
-                                    : ""
-                            }
-
-                        </small>
-
-                        <button
-                            data-equip="${index}"
-                        >
-
-                            ${
-                                equipped
-                                    ? "Desequipar"
-                                    : "Equipar"
-                            }
-
-                        </button>
-
-                    </div>
-
-                    `;
-
-                }
-            )
-            .join("");
-
-}
-
-
-// ==========================================
-// LOJA
-// ==========================================
-
-function renderShop() {
-
-    els.shop.innerHTML =
-        items
-            .map(
-                item => `
-
-                <div class="item ${item.rarity}">
-
-                    ${item.icon}
-
-                    <b>${item.name}</b>
-
-                    <br>
-
-                    <small>
-
-                        ${
-                            item.damage
-                                ? `+${item.damage} ataque `
-                                : ""
-                        }
-
-                        ${
-                            item.defense
-                                ? `+${item.defense} defesa`
-                                : ""
-                        }
-
-                    </small>
-
-                    <br>
-
-                    💰 ${item.price}
-
-                    <button
-                        data-buy="${item.id}"
-                    >
-
-                        Comprar
-
-                    </button>
-
-                </div>
-
-                `
-            )
-            .join("");
-
-}
-
-
-// ==========================================
-// BOTÃO DE BATALHA
-// ==========================================
-
-els.start.addEventListener(
-    "click",
-    startBattle
-);
-
-
-// ==========================================
-// AUTO-BATALHA
-// ==========================================
-
-els.auto.addEventListener(
-    "click",
-    () => {
-
-        player.auto =
-            !player.auto;
-
-
-        save();
-
-        update();
-
-
-        if (
-            player.auto &&
-            !battleActive
-        ) {
-
-            startBattle();
-
-        }
-
-    }
-);
-
-
-// ==========================================
-// EQUIPAR
-// ==========================================
-
-els.inventory.addEventListener(
-    "click",
-    event => {
-
-        const index =
-            event.target.dataset.equip;
-
-
-        if (
-            index === undefined
-        ) {
-
-            return;
-
-        }
-
-
-        const item =
-            items.find(
-                x =>
-                    x.id ===
-                    player.inventory[
-                        index
-                    ]
-            );
-
-
-        if (!item) {
-
-            return;
-
-        }
-
-
-        if (
-            player.equipment[
-                item.slot
-            ] ===
-            item.id
-        ) {
-
-            player.equipment[
-                item.slot
-            ] = null;
-
-        } else {
-
-            player.equipment[
-                item.slot
-            ] = item.id;
-
-        }
-
-
-        save();
-
-        update();
-
-    }
-);
-
-
-// ==========================================
-// COMPRAR
-// ==========================================
-
-els.shop.addEventListener(
-    "click",
-    event => {
-
-        const id =
-            event.target.dataset.buy;
-
-
-        if (!id) {
-
-            return;
-
-        }
-
-
-        const item =
-            items.find(
-                x =>
-                    x.id === id
-            );
-
-
-        if (
-            player.gold <
-            item.price
-        ) {
-
-            els.message.textContent =
-                "💰 Ouro insuficiente.";
-
-            return;
-
-        }
-
-
-        player.gold -=
-            item.price;
-
-
-        player.inventory.push(
-            item.id
-        );
-
-
-        els.message.textContent =
-            `🛒 ${item.name} comprado!`;
-
-
-        save();
-
-        update();
-
-    }
-);
-// INICIAR O JOGO
-load();
-
-
-// ==========================================
-// APAGA
+   
