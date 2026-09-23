@@ -1,94 +1,248 @@
-// ==========================================
-// IDLE RPG - SISTEMA PRINCIPAL
-// ==========================================
+const SAVE_KEY = "idleRPG_complete_v3";
 
-const SAVE_KEY = "idleRPG_save_v2";
+const OFFLINE_CAP = 8 * 60 * 60 * 1000;
 
 let player = {
     level: 1,
     xp: 0,
     gold: 0,
+
     maxHp: 100,
     hp: 100,
+
     damage: 10,
-    phase: 1
+    defense: 0,
+
+    phase: 1,
+
+    auto: false,
+
+    equipment: {
+        weapon: null,
+        armor: null,
+        ring: null
+    },
+
+    inventory: []
 };
 
 let enemy = null;
+
 let battleActive = false;
+
 let battleTimer = null;
+
+let lastSaved = Date.now();
 
 
 // ==========================================
 // ELEMENTOS
 // ==========================================
 
-const goldElement = document.getElementById("gold");
-const xpElement = document.getElementById("xp");
-const levelElement = document.getElementById("level");
+const $ = id =>
+    document.getElementById(id);
 
-const playerHpElement = document.getElementById("playerHp");
-const enemyHpElement = document.getElementById("enemyHp");
+const els = {
 
-const playerHealthBar = document.getElementById("playerHealth");
-const enemyHealthBar = document.getElementById("enemyHealth");
+    gold: $("gold"),
+    xp: $("xp"),
+    level: $("level"),
+    phase: $("phase"),
 
-const messageElement = document.getElementById("message");
+    damage: $("damage"),
+    defense: $("defense"),
 
-const startButton = document.getElementById("startButton");
+    heroHpText: $("heroHpText"),
 
-const enemyNameElement = document.getElementById("enemyName");
+    playerHp: $("playerHp"),
+    playerMaxHp: $("playerMaxHp"),
 
+    enemyHp: $("enemyHp"),
+    enemyMaxHp: $("enemyMaxHp"),
 
-// ==========================================
-// FASE
-// ==========================================
+    playerHealth: $("playerHealth"),
+    enemyHealth: $("enemyHealth"),
 
-const statsContainer = document.querySelector(".stats");
+    enemyName: $("enemyName"),
+    enemyEmoji: $("enemyEmoji"),
 
-const phaseContainer = document.createElement("span");
+    message: $("message"),
 
-phaseContainer.innerHTML = "🗺️ Fase: <b id='phase'>1</b>";
+    start: $("startButton"),
+    auto: $("autoButton"),
 
-statsContainer.appendChild(phaseContainer);
+    inventory: $("inventory"),
+    shop: $("shop"),
 
-const phaseElement = document.getElementById("phase");
+    offline: $("offlineText"),
+
+    xpBar: $("xpBar"),
+    xpNeeded: $("xpNeeded"),
+
+    weaponName: $("weaponName"),
+    armorName: $("armorName"),
+    ringName: $("ringName")
+};
 
 
 // ==========================================
 // INIMIGOS
 // ==========================================
 
-const enemyTypes = [
+const enemies = [
+
     {
         name: "Goblin",
-        baseHp: 50,
-        baseDamage: 5,
-        baseGold: 10,
-        baseXp: 20
+        emoji: "👹",
+        hp: 50,
+        damage: 5,
+        gold: 10,
+        xp: 20
     },
+
     {
         name: "Orc",
-        baseHp: 80,
-        baseDamage: 8,
-        baseGold: 18,
-        baseXp: 35
+        emoji: "👺",
+        hp: 80,
+        damage: 8,
+        gold: 18,
+        xp: 35
     },
+
     {
         name: "Troll",
-        baseHp: 120,
-        baseDamage: 12,
-        baseGold: 30,
-        baseXp: 50
+        emoji: "👹",
+        hp: 120,
+        damage: 12,
+        gold: 30,
+        xp: 50
     },
+
     {
         name: "Demônio",
-        baseHp: 180,
-        baseDamage: 18,
-        baseGold: 50,
-        baseXp: 80
+        emoji: "😈",
+        hp: 180,
+        damage: 18,
+        gold: 50,
+        xp: 80
     }
+
 ];
+
+
+// ==========================================
+// ITENS
+// ==========================================
+
+const items = [
+
+    {
+        id: "sword1",
+        name: "Espada de Ferro",
+        slot: "weapon",
+        rarity: "common",
+        icon: "⚔️",
+        damage: 5,
+        price: 50
+    },
+
+    {
+        id: "armor1",
+        name: "Armadura de Couro",
+        slot: "armor",
+        rarity: "common",
+        icon: "🛡️",
+        defense: 3,
+        price: 60
+    },
+
+    {
+        id: "ring1",
+        name: "Anel do Aprendiz",
+        slot: "ring",
+        rarity: "rare",
+        icon: "💍",
+        damage: 8,
+        price: 100
+    },
+
+    {
+        id: "sword2",
+        name: "Lâmina Arcana",
+        slot: "weapon",
+        rarity: "epic",
+        icon: "🗡️",
+        damage: 18,
+        price: 250
+    },
+
+    {
+        id: "armor2",
+        name: "Armadura do Guardião",
+        slot: "armor",
+        rarity: "epic",
+        icon: "🛡️",
+        defense: 12,
+        price: 300
+    },
+
+    {
+        id: "ring2",
+        name: "Anel Lendário",
+        slot: "ring",
+        rarity: "legendary",
+        icon: "💍",
+        damage: 30,
+        price: 600
+    }
+
+];
+
+
+// ==========================================
+// XP
+// ==========================================
+
+function xpNeed() {
+
+    return player.level * 100;
+
+}
+
+
+// ==========================================
+// BÔNUS DOS EQUIPAMENTOS
+// ==========================================
+
+function bonuses() {
+
+    let damage = 10;
+
+    let defense = 0;
+
+    for (
+        const id of Object.values(player.equipment)
+    ) {
+
+        const item =
+            items.find(x => x.id === id);
+
+        if (item) {
+
+            damage += item.damage || 0;
+
+            defense += item.defense || 0;
+
+        }
+
+    }
+
+    return {
+        damage,
+        defense
+    };
+
+}
 
 
 // ==========================================
@@ -97,74 +251,111 @@ const enemyTypes = [
 
 function createEnemy() {
 
-    const phase = player.phase;
+    const boss =
+        player.phase % 10 === 0;
 
-    const isBoss = phase % 10 === 0;
+    if (boss) {
 
-    if (isBoss) {
+        const n =
+            Math.floor(player.phase / 10);
 
-        const hp = Math.floor(
-            300 * Math.pow(1.18, phase / 10 - 1)
-        );
-
-        const damage = Math.floor(
-            25 * Math.pow(1.15, phase / 10 - 1)
-        );
-
-        const gold = Math.floor(
-            150 * Math.pow(1.20, phase / 10 - 1)
-        );
-
-        const xp = Math.floor(
-            250 * Math.pow(1.20, phase / 10 - 1)
-        );
+        const hp =
+            Math.floor(
+                300 *
+                Math.pow(1.18, n - 1)
+            );
 
         enemy = {
-            name: "👑 BOSS - Rei Demônio",
+
+            name: "Rei Demônio",
+
+            emoji: "👑",
+
             maxHp: hp,
+
             hp: hp,
-            damage: damage,
-            rewardGold: gold,
-            rewardXp: xp,
+
+            damage:
+                Math.floor(
+                    25 *
+                    Math.pow(1.15, n - 1)
+                ),
+
+            rewardGold:
+                Math.floor(
+                    150 *
+                    Math.pow(1.2, n - 1)
+                ),
+
+            rewardXp:
+                Math.floor(
+                    250 *
+                    Math.pow(1.2, n - 1)
+                ),
+
             boss: true
+
         };
 
     } else {
 
-        const index = Math.min(
-            Math.floor((phase - 1) / 3),
-            enemyTypes.length - 1
-        );
+        const type =
+            enemies[
+                Math.min(
+                    Math.floor(
+                        (player.phase - 1) / 3
+                    ),
+                    enemies.length - 1
+                )
+            ];
 
-        const type = enemyTypes[index];
+        const multiplier =
+            Math.pow(
+                1.12,
+                player.phase - 1
+            );
 
-        const multiplier = Math.pow(
-            1.12,
-            phase - 1
-        );
-
-        const hp = Math.floor(
-            type.baseHp * multiplier
-        );
+        const hp =
+            Math.floor(
+                type.hp * multiplier
+            );
 
         enemy = {
+
             name: type.name,
+
+            emoji: type.emoji,
+
             maxHp: hp,
+
             hp: hp,
-            damage: Math.floor(
-                type.baseDamage * multiplier
-            ),
-            rewardGold: Math.floor(
-                type.baseGold * multiplier
-            ),
-            rewardXp: Math.floor(
-                type.baseXp * multiplier
-            ),
+
+            damage:
+                Math.floor(
+                    type.damage *
+                    multiplier
+                ),
+
+            rewardGold:
+                Math.floor(
+                    type.gold *
+                    multiplier
+                ),
+
+            rewardXp:
+                Math.floor(
+                    type.xp *
+                    multiplier
+                ),
+
             boss: false
+
         };
+
     }
 
-    updateScreen();
+    update();
+
 }
 
 
@@ -172,37 +363,139 @@ function createEnemy() {
 // ATUALIZAR TELA
 // ==========================================
 
-function updateScreen() {
+function update() {
 
-    if (!enemy) return;
+    const b =
+        bonuses();
 
-    goldElement.textContent = Math.floor(player.gold);
+    player.damage =
+        b.damage;
 
-    xpElement.textContent = Math.floor(player.xp);
+    player.defense =
+        b.defense;
 
-    levelElement.textContent = player.level;
 
-    phaseElement.textContent = player.phase;
+    els.gold.textContent =
+        Math.floor(player.gold);
 
-    playerHpElement.textContent =
-        Math.max(0, Math.floor(player.hp));
+    els.xp.textContent =
+        Math.floor(player.xp);
 
-    enemyHpElement.textContent =
-        Math.max(0, Math.floor(enemy.hp));
+    els.level.textContent =
+        player.level;
 
-    playerHealthBar.style.width =
+    els.phase.textContent =
+        player.phase;
+
+
+    els.damage.textContent =
+        player.damage;
+
+    els.defense.textContent =
+        player.defense;
+
+
+    els.playerHp.textContent =
         Math.max(
             0,
-            (player.hp / player.maxHp) * 100
-        ) + "%";
+            Math.floor(player.hp)
+        );
 
-    enemyHealthBar.style.width =
-        Math.max(
+    els.playerMaxHp.textContent =
+        player.maxHp;
+
+
+    els.heroHpText.textContent =
+        `${Math.max(
             0,
-            (enemy.hp / enemy.maxHp) * 100
+            Math.floor(player.hp)
+        )}/${player.maxHp}`;
+
+
+    if (enemy) {
+
+        els.enemyHp.textContent =
+            Math.max(
+                0,
+                Math.floor(enemy.hp)
+            );
+
+        els.enemyMaxHp.textContent =
+            enemy.maxHp;
+
+        els.enemyName.textContent =
+            enemy.boss
+                ? "👑 " + enemy.name
+                : enemy.name;
+
+        els.enemyEmoji.textContent =
+            enemy.emoji;
+
+
+        els.playerHealth.style.width =
+            Math.max(
+                0,
+                player.hp /
+                player.maxHp *
+                100
+            ) + "%";
+
+
+        els.enemyHealth.style.width =
+            Math.max(
+                0,
+                enemy.hp /
+                enemy.maxHp *
+                100
+            ) + "%";
+
+    }
+
+
+    els.xpBar.style.width =
+        Math.min(
+            100,
+            player.xp /
+            xpNeed() *
+            100
         ) + "%";
 
-    enemyNameElement.textContent = enemy.name;
+
+    els.xpNeeded.textContent =
+        xpNeed() -
+        player.xp;
+
+
+    els.auto.textContent =
+        player.auto
+            ? "🤖 Auto: ON"
+            : "🤖 Auto: OFF";
+
+
+    for (
+        const slot of
+        ["weapon", "armor", "ring"]
+    ) {
+
+        const item =
+            items.find(
+                x =>
+                    x.id ===
+                    player.equipment[slot]
+            );
+
+        els[slot + "Name"].textContent =
+            item
+                ? item.name
+                : "Vazio";
+
+    }
+
+
+    renderInventory();
+
+    renderShop();
+
 }
 
 
@@ -210,24 +503,33 @@ function updateScreen() {
 // SALVAR
 // ==========================================
 
-function saveGame() {
+function save() {
 
     try {
 
-        const saveData = {
-            player: player,
-            savedAt: Date.now()
-        };
+        lastSaved =
+            Date.now();
 
         localStorage.setItem(
+
             SAVE_KEY,
-            JSON.stringify(saveData)
+
+            JSON.stringify({
+
+                player,
+
+                savedAt: lastSaved
+
+            })
+
         );
 
     } catch (error) {
 
-        console.error("Erro ao salvar:", error);
+        console.error(error);
+
     }
+
 }
 
 
@@ -235,53 +537,115 @@ function saveGame() {
 // CARREGAR
 // ==========================================
 
-function loadGame() {
+function load() {
 
     try {
 
-        const saved = localStorage.getItem(SAVE_KEY);
+        const raw =
+            localStorage.getItem(
+                SAVE_KEY
+            );
 
-        if (saved) {
+        if (raw) {
 
-            const data = JSON.parse(saved);
+            const data =
+                JSON.parse(raw);
 
             if (data.player) {
 
                 player = {
+
                     ...player,
-                    ...data.player
+
+                    ...data.player,
+
+                    equipment: {
+
+                        ...player.equipment,
+
+                        ...(data.player.equipment || {})
+
+                    },
+
+                    inventory:
+
+                        Array.isArray(
+                            data.player.inventory
+                        )
+
+                            ? data.player.inventory
+
+                            : []
+
                 };
+
+
+                const elapsed = Math.min(
+
+                    OFFLINE_CAP,
+
+                    Math.max(
+
+                        0,
+
+                        Date.now() -
+                        (data.savedAt ||
+                         Date.now())
+
+                    )
+
+                );
+
+
+                if (elapsed > 60000) {
+
+                    const minutes =
+                        Math.floor(
+                            elapsed / 60000
+                        );
+
+                    const gold =
+                        Math.floor(
+                            minutes * 2
+                        );
+
+                    player.gold +=
+                        gold;
+
+                    els.offline.textContent =
+                        `Você ficou ${minutes} min offline e recebeu 💰 ${gold} ouro.`;
+
+                } else {
+
+                    els.offline.textContent =
+                        "Nenhuma recompensa offline pendente.";
+
+                }
+
             }
+
         }
 
     } catch (error) {
 
-        console.error("Erro ao carregar:", error);
+        console.error(error);
+
     }
+
+
+    if (
+        player.hp >
+        player.maxHp
+    ) {
+
+        player.hp =
+            player.maxHp;
+
+    }
+
 
     createEnemy();
 
-    messageElement.textContent =
-        savedExists()
-            ? "💾 Progresso carregado!"
-            : "Prepare-se para a batalha!";
-}
-
-
-// ==========================================
-// VERIFICAR SAVE
-// ==========================================
-
-function savedExists() {
-
-    try {
-
-        return localStorage.getItem(SAVE_KEY) !== null;
-
-    } catch (error) {
-
-        return false;
-    }
 }
 
 
@@ -292,27 +656,34 @@ function savedExists() {
 function startBattle() {
 
     if (battleActive) {
+
         return;
+
     }
 
-    if (!enemy) {
-        createEnemy();
-    }
 
-    battleActive = true;
+    battleActive =
+        true;
 
-    startButton.disabled = true;
 
-    startButton.textContent =
+    els.start.disabled =
+        true;
+
+
+    els.start.textContent =
         "⚔️ Lutando...";
 
-    messageElement.textContent =
+
+    els.message.textContent =
         "⚔️ A batalha começou!";
 
-    battleTimer = setInterval(
-        battleRound,
-        1000
-    );
+
+    battleTimer =
+        setInterval(
+            round,
+            1000
+        );
+
 }
 
 
@@ -320,139 +691,198 @@ function startBattle() {
 // RODADA
 // ==========================================
 
-function battleRound() {
+function round() {
 
-    if (!battleActive || !enemy) {
+    if (!battleActive) {
+
         return;
+
     }
 
-    // HERÓI ATACA
-    enemy.hp -= player.damage;
 
-    // INIMIGO MORRE
+    enemy.hp -=
+        player.damage;
+
+
     if (enemy.hp <= 0) {
 
-        enemy.hp = 0;
-
-        updateScreen();
-
-        enemyDefeated();
+        win();
 
         return;
+
     }
 
-    // INIMIGO ATACA
-    player.hp -= enemy.damage;
 
-    // HERÓI MORRE
+    const received =
+        Math.max(
+            1,
+            enemy.damage -
+            player.defense
+        );
+
+
+    player.hp -=
+        received;
+
+
     if (player.hp <= 0) {
 
-        player.hp = 0;
-
-        updateScreen();
-
-        playerDefeated();
+        lose();
 
         return;
+
     }
 
-    messageElement.textContent =
-        "⚔️ Você causou " +
-        player.damage +
-        " de dano!";
 
-    updateScreen();
+    els.message.textContent =
+        `⚔️ Você causou ${player.damage} e recebeu ${received} de dano.`;
 
-    saveGame();
+
+    update();
+
+    save();
+
 }
 
 
 // ==========================================
-// INIMIGO DERROTADO
+// VITÓRIA
 // ==========================================
 
-function enemyDefeated() {
+function win() {
 
-    clearInterval(battleTimer);
+    clearInterval(
+        battleTimer
+    );
 
-    battleTimer = null;
+    battleTimer =
+        null;
 
-    battleActive = false;
+    battleActive =
+        false;
 
-    player.gold += enemy.rewardGold;
 
-    player.xp += enemy.rewardXp;
+    player.gold +=
+        enemy.rewardGold;
 
-    if (enemy.boss) {
 
-        messageElement.textContent =
-            "👑 BOSS DERROTADO! +" +
-            enemy.rewardGold +
-            " ouro!";
+    player.xp +=
+        enemy.rewardXp;
 
-    } else {
 
-        messageElement.textContent =
-            "🎉 " +
-            enemy.name +
-            " derrotado! +" +
-            enemy.rewardGold +
-            " ouro!";
-    }
+    let text =
+        `🎉 ${
+            enemy.boss
+                ? "BOSS "
+                : ""
+        }${enemy.name} derrotado! +${
+            enemy.rewardGold
+        } ouro, +${
+            enemy.rewardXp
+        } XP.`;
 
-    checkLevelUp();
+
+    checkLevel();
+
 
     player.phase++;
 
-    player.hp = player.maxHp;
 
-    saveGame();
+    player.hp =
+        player.maxHp;
 
-    updateScreen();
 
-    startButton.textContent =
+    const drop =
+        dropItem();
+
+
+    if (drop) {
+
+        player.inventory.push(
+            drop.id
+        );
+
+        text +=
+            ` 🎁 Drop: ${drop.name}!`;
+
+    }
+
+
+    els.message.textContent =
+        text;
+
+
+    save();
+
+    update();
+
+
+    els.start.textContent =
         "⏳ Próxima batalha...";
 
-    startButton.disabled = true;
 
-    setTimeout(function () {
+    setTimeout(
+        () => {
 
-        createEnemy();
+            createEnemy();
 
-        startButton.disabled = false;
+            els.start.disabled =
+                false;
 
-        startButton.textContent =
-            "⚔️ Próxima batalha";
+            els.start.textContent =
+                "⚔️ Próxima batalha";
 
-    }, 1200);
+
+            if (player.auto) {
+
+                startBattle();
+
+            }
+
+        },
+        900
+    );
+
 }
 
 
 // ==========================================
-// JOGADOR DERROTADO
+// DERROTA
 // ==========================================
 
-function playerDefeated() {
+function lose() {
 
-    clearInterval(battleTimer);
+    clearInterval(
+        battleTimer
+    );
 
-    battleTimer = null;
+    battleTimer =
+        null;
 
-    battleActive = false;
+    battleActive =
+        false;
 
-    player.hp = player.maxHp;
 
-    messageElement.textContent =
+    player.hp =
+        player.maxHp;
+
+
+    els.message.textContent =
         "💀 Você foi derrotado!";
 
-    startButton.disabled = false;
 
-    startButton.textContent =
+    els.start.disabled =
+        false;
+
+
+    els.start.textContent =
         "🔄 Tentar novamente";
 
-    saveGame();
 
-    updateScreen();
+    save();
+
+    update();
+
 }
 
 
@@ -460,85 +890,385 @@ function playerDefeated() {
 // LEVEL UP
 // ==========================================
 
-function checkLevelUp() {
+function checkLevel() {
 
-    let requiredXp =
-        player.level * 100;
+    while (
+        player.xp >=
+        xpNeed()
+    ) {
 
-    let leveledUp = false;
+        player.xp -=
+            xpNeed();
 
-    while (player.xp >= requiredXp) {
-
-        player.xp -= requiredXp;
 
         player.level++;
 
-        player.maxHp += 20;
 
-        player.damage += 5;
+        player.maxHp +=
+            20;
 
-        player.hp = player.maxHp;
 
-        requiredXp =
-            player.level * 100;
+        player.hp =
+            player.maxHp;
 
-        leveledUp = true;
     }
 
-    if (leveledUp) {
-
-        messageElement.textContent =
-            "🎉 LEVEL UP! Nível " +
-            player.level + "!";
-    }
 }
 
 
 // ==========================================
-// SALVAMENTO AUTOMÁTICO
+// DROP
 // ==========================================
 
-window.addEventListener(
-    "beforeunload",
-    function () {
-        saveGame();
+function dropItem() {
+
+    const chance =
+        Math.random();
+
+
+    if (chance > 0.28) {
+
+        return null;
+
     }
+
+
+    const pool =
+        items.filter(
+            i =>
+                i.price <=
+                Math.max(
+                    100,
+                    player.phase * 50
+                )
+        );
+
+
+    return pool[
+        Math.floor(
+            Math.random() *
+            pool.length
+        )
+    ] || null;
+
+}
+
+
+// ==========================================
+// INVENTÁRIO
+// ==========================================
+
+function renderInventory() {
+
+    if (
+        !player.inventory.length
+    ) {
+
+        els.inventory.innerHTML =
+            "<div class='item'>Seu inventário está vazio.</div>";
+
+        return;
+
+    }
+
+
+    els.inventory.innerHTML =
+        player.inventory
+            .map(
+                (id, index) => {
+
+                    const item =
+                        items.find(
+                            x =>
+                                x.id ===
+                                id
+                        );
+
+
+                    if (!item) {
+
+                        return "";
+
+                    }
+
+
+                    const equipped =
+                        player.equipment[
+                            item.slot
+                        ] ===
+                        item.id;
+
+
+                    return `
+
+                    <div class="item ${item.rarity}">
+
+                        ${item.icon}
+
+                        <b>${item.name}</b>
+
+                        <br>
+
+                        <small>
+
+                            ${
+                                item.damage
+                                    ? `+${item.damage} ataque `
+                                    : ""
+                            }
+
+                            ${
+                                item.defense
+                                    ? `+${item.defense} defesa`
+                                    : ""
+                            }
+
+                        </small>
+
+                        <button
+                            data-equip="${index}"
+                        >
+
+                            ${
+                                equipped
+                                    ? "Desequipar"
+                                    : "Equipar"
+                            }
+
+                        </button>
+
+                    </div>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+}
+
+
+// ==========================================
+// LOJA
+// ==========================================
+
+function renderShop() {
+
+    els.shop.innerHTML =
+        items
+            .map(
+                item => `
+
+                <div class="item ${item.rarity}">
+
+                    ${item.icon}
+
+                    <b>${item.name}</b>
+
+                    <br>
+
+                    <small>
+
+                        ${
+                            item.damage
+                                ? `+${item.damage} ataque `
+                                : ""
+                        }
+
+                        ${
+                            item.defense
+                                ? `+${item.defense} defesa`
+                                : ""
+                        }
+
+                    </small>
+
+                    <br>
+
+                    💰 ${item.price}
+
+                    <button
+                        data-buy="${item.id}"
+                    >
+
+                        Comprar
+
+                    </button>
+
+                </div>
+
+                `
+            )
+            .join("");
+
+}
+
+
+// ==========================================
+// BOTÃO DE BATALHA
+// ==========================================
+
+els.start.addEventListener(
+    "click",
+    startBattle
 );
 
-document.addEventListener(
-    "visibilitychange",
-    function () {
-
-        if (document.visibilityState === "hidden") {
-            saveGame();
-        }
-    }
-);
-
 
 // ==========================================
-// BOTÃO
+// AUTO-BATALHA
 // ==========================================
 
-if (startButton) {
+els.auto.addEventListener(
+    "click",
+    () => {
 
-    startButton.addEventListener(
-        "click",
-        function () {
+        player.auto =
+            !player.auto;
+
+
+        save();
+
+        update();
+
+
+        if (
+            player.auto &&
+            !battleActive
+        ) {
+
             startBattle();
+
         }
-    );
 
-} else {
-
-    console.error(
-        "ERRO: botão startButton não encontrado."
-    );
-}
+    }
+);
 
 
 // ==========================================
-// INICIAR JOGO
+// EQUIPAR
 // ==========================================
 
-loadGame();
+els.inventory.addEventListener(
+    "click",
+    event => {
+
+        const index =
+            event.target.dataset.equip;
+
+
+        if (
+            index === undefined
+        ) {
+
+            return;
+
+        }
+
+
+        const item =
+            items.find(
+                x =>
+                    x.id ===
+                    player.inventory[
+                        index
+                    ]
+            );
+
+
+        if (!item) {
+
+            return;
+
+        }
+
+
+        if (
+            player.equipment[
+                item.slot
+            ] ===
+            item.id
+        ) {
+
+            player.equipment[
+                item.slot
+            ] = null;
+
+        } else {
+
+            player.equipment[
+                item.slot
+            ] = item.id;
+
+        }
+
+
+        save();
+
+        update();
+
+    }
+);
+
+
+// ==========================================
+// COMPRAR
+// ==========================================
+
+els.shop.addEventListener(
+    "click",
+    event => {
+
+        const id =
+            event.target.dataset.buy;
+
+
+        if (!id) {
+
+            return;
+
+        }
+
+
+        const item =
+            items.find(
+                x =>
+                    x.id === id
+            );
+
+
+        if (
+            player.gold <
+            item.price
+        ) {
+
+            els.message.textContent =
+                "💰 Ouro insuficiente.";
+
+            return;
+
+        }
+
+
+        player.gold -=
+            item.price;
+
+
+        player.inventory.push(
+            item.id
+        );
+
+
+        els.message.textContent =
+            `🛒 ${item.name} comprado!`;
+
+
+        save();
+
+        update();
+
+    }
+);
+
+
+// ==========================================
+// APAGA
