@@ -1,0 +1,143 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #111827;
+    color: white;
+    min-height: 100vh;
+}
+
+.game {
+    width: 100%;
+    max-width: 600px;
+    margin: auto;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 30px;
+}
+
+.stats {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    background: #1f2937;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+}
+
+.stats span {
+    font-size: 14px;
+}
+
+.battle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: #1f2937;
+    padding: 20px;
+    border-radius: 16px;
+}
+
+.character,
+.enemy {
+    width: 42%;
+    text-align: center;
+}
+
+.emoji {
+    font-size: 70px;
+    margin-bottom: 10px;
+}
+
+.character h2,
+.enemy h2 {
+    font-size: 20px;
+    margin-bottom: 12px;
+}
+
+.vs {
+    font-size: 30px;
+}
+
+.bar {
+    width: 100%;
+    height: 14px;
+    background: #374151;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.health {
+    width: 100%;
+    height: 100%;
+    background: #22c55e;
+    transition: width 0.3s;
+}
+
+.actions {
+    margin-top: 25px;
+}
+
+button {
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    padding: 16px;
+    background: #7c3aed;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+.message {
+    text-align: center;
+    margin-top: 20px;
+    padding: 15px;
+    background: #1f2937;
+    border-radius: 12px;
+    color: #d1d5db;
+}
+
+@media (max-width: 400px) {
+
+    .game {
+        padding: 12px;
+    }
+
+    .battle {
+        padding: 12px;
+    }
+
+    .emoji {
+        font-size: 50px;
+    }
+
+    .character h2,
+    .enemy h2 {
+        font-size: 16px;
+    }
+
+    .stats {
+        padding: 10px;
+    }
+
+    .stats span {
+        font-size: 12px;
+    }
+}
