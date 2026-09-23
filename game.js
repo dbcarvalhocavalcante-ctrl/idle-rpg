@@ -1268,6 +1268,8 @@ els.shop.addEventListener(
 
     }
 );
+// INICIAR O JOGO
+load();
 
 
 // ==========================================
