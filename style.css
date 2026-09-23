@@ -1,143 +1,231 @@
 * {
     box-sizing: border-box;
-    margin: 0;
-    padding: 0;
 }
 
 body {
+    margin: 0;
+    background: #08111f;
+    color: #f8fafc;
     font-family: Arial, sans-serif;
-    background: #111827;
-    color: white;
-    min-height: 100vh;
 }
 
 .game {
-    width: 100%;
-    max-width: 600px;
+    max-width: 760px;
     margin: auto;
-    padding: 20px;
+    padding: 16px;
 }
 
 h1 {
     text-align: center;
-    margin-bottom: 20px;
-    font-size: 30px;
+    margin: 8px 0 14px;
+}
+
+h2,
+h3 {
+    margin-top: 8px;
+}
+
+.panel {
+    background: #111c2e;
+    border: 1px solid #263753;
+    border-radius: 16px;
+    padding: 14px;
+    margin: 12px 0;
+    box-shadow: 0 8px 24px rgba(0,0,0,.2);
 }
 
 .stats {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 8px;
-    background: #1f2937;
-    padding: 15px;
-    border-radius: 12px;
-    margin-bottom: 25px;
 }
 
 .stats span {
-    font-size: 14px;
+    background: #17243a;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
 }
 
 .battle {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     gap: 10px;
-    background: #1f2937;
-    padding: 20px;
-    border-radius: 16px;
+    align-items: center;
+    text-align: center;
 }
 
 .character,
 .enemy {
-    width: 42%;
-    text-align: center;
+    padding: 8px;
 }
 
-.emoji {
-    font-size: 70px;
-    margin-bottom: 10px;
+.emoji,
+.big-emoji {
+    font-size: 64px;
 }
 
-.character h2,
-.enemy h2 {
-    font-size: 20px;
-    margin-bottom: 12px;
+.big-emoji {
+    font-size: 72px;
 }
 
 .vs {
-    font-size: 30px;
+    font-size: 32px;
 }
 
-.bar {
-    width: 100%;
-    height: 14px;
-    background: #374151;
-    border-radius: 20px;
+.bar,
+.progress-wrap {
+    height: 18px;
+    background: #263449;
+    border-radius: 99px;
     overflow: hidden;
-    margin-bottom: 8px;
 }
 
 .health {
-    width: 100%;
     height: 100%;
+    width: 100%;
     background: #22c55e;
-    transition: width 0.3s;
+    transition: width .2s;
+}
+
+.progress-wrap {
+    height: 14px;
 }
 
 .actions {
-    margin-top: 25px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
 }
 
 button {
-    width: 100%;
-    border: none;
+    border: 0;
     border-radius: 12px;
-    padding: 16px;
-    background: #7c3aed;
-    color: white;
-    font-size: 18px;
+    padding: 13px 12px;
+    background: #334155;
+    color: #fff;
     font-weight: bold;
+    font-size: 15px;
     cursor: pointer;
 }
 
-button:active {
-    transform: scale(0.98);
+button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.primary {
+    background: #7c3aed;
+}
+
+.danger {
+    background: #991b1b;
 }
 
 .message {
     text-align: center;
-    margin-top: 20px;
-    padding: 15px;
-    background: #1f2937;
+    background: #17243a;
     border-radius: 12px;
-    color: #d1d5db;
+    padding: 13px;
+    margin: 12px 0;
 }
 
-@media (max-width: 400px) {
+.character-sheet {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
 
-    .game {
-        padding: 12px;
+.hero-card {
+    text-align: center;
+    background: #17243a;
+    border-radius: 14px;
+    padding: 12px;
+}
+
+.equipment {
+    background: #17243a;
+    border-radius: 14px;
+    padding: 12px;
+}
+
+.equip-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.equip-slot {
+    display: grid;
+    grid-template-columns: 35px 1fr 1.5fr;
+    align-items: center;
+    text-align: left;
+    gap: 5px;
+}
+
+.equip-slot small {
+    opacity: .7;
+}
+
+.inventory,
+.shop {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 9px;
+}
+
+.item {
+    background: #17243a;
+    padding: 10px;
+    border-radius: 12px;
+}
+
+.item button {
+    width: 100%;
+    margin-top: 7px;
+}
+
+.common {
+    border-left: 4px solid #94a3b8;
+}
+
+.rare {
+    border-left: 4px solid #3b82f6;
+}
+
+.epic {
+    border-left: 4px solid #a855f7;
+}
+
+.legendary {
+    border-left: 4px solid #f59e0b;
+}
+
+footer {
+    text-align: center;
+    padding: 10px;
+}
+
+@media(max-width:560px) {
+
+    .character-sheet {
+        grid-template-columns: 1fr;
     }
 
     .battle {
-        padding: 12px;
+        grid-template-columns: 1fr;
     }
 
-    .emoji {
-        font-size: 50px;
+    .vs {
+        transform: rotate(90deg);
     }
 
-    .character h2,
-    .enemy h2 {
-        font-size: 16px;
+    .actions {
+        grid-template-columns: 1fr;
     }
 
-    .stats {
-        padding: 10px;
-    }
-
-    .stats span {
-        font-size: 12px;
+    .inventory,
+    .shop {
+        grid-template-columns: 1fr;
     }
 }
