@@ -1,222 +1,346 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="theme-color" content="#111827">
-<title>Idle RPG</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Idle RPG</title>
+
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div class="game">
+    <div class="game">
 
-  <header>
-    <h1>⚔️ Idle RPG</h1>
+        <h1>⚔️ Idle RPG</h1>
 
-    <div class="stats">
-      <span>💰 Ouro: <b id="gold">0</b></span>
-      <span>⭐ XP: <b id="xp">0</b></span>
-      <span>🏆 Nível: <b id="level">1</b></span>
-      <span>🗺️ Fase: <b id="phase">1</b></span>
-    </div>
-  </header>
+        <div class="stats">
 
+            <span>
+                💰 Ouro:
+                <b id="gold">0</b>
+            </span>
 
-  <section class="panel">
+            <span>
+                ⭐ XP:
+                <b id="xp">0</b>
+            </span>
 
-    <h2>🧙 Personagem</h2>
+            <span>
+                🏆 Nível:
+                <b id="level">1</b>
+            </span>
 
-    <div class="character-sheet">
-
-      <div class="hero-card">
-
-        <div class="big-emoji" id="heroEmoji">
-          🧙
-        </div>
-
-        <h3>Herói</h3>
-
-        <p>
-          ⚔️ Ataque:
-          <b id="damage">10</b>
-        </p>
-
-        <p>
-          ❤️ Vida:
-          <b id="heroHpText">100/100</b>
-        </p>
-
-        <p>
-          🛡️ Defesa:
-          <b id="defense">0</b>
-        </p>
-
-      </div>
-
-
-      <div class="equipment">
-
-        <h3>🎒 Equipamentos</h3>
-
-        <div class="equip-grid">
-
-          <button class="equip-slot" data-slot="weapon">
-            ⚔️
-            <small>Arma</small>
-            <b id="weaponName">Vazio</b>
-          </button>
-
-          <button class="equip-slot" data-slot="armor">
-            🛡️
-            <small>Armadura</small>
-            <b id="armorName">Vazio</b>
-          </button>
-
-          <button class="equip-slot" data-slot="ring">
-            💍
-            <small>Anel</small>
-            <b id="ringName">Vazio</b>
-          </button>
+            <span>
+                🗺️ Fase:
+                <b id="phase">1</b>
+            </span>
 
         </div>
 
-      </div>
+
+        <section class="panel">
+
+            <h2>🧙 Personagem</h2>
+
+            <div class="character-sheet">
+
+                <div class="hero-card">
+
+                    <div class="big-emoji">
+                        🧙
+                    </div>
+
+                    <h3>Herói</h3>
+
+                    <p>
+                        ⚔️ Ataque:
+                        <b id="damage">10</b>
+                    </p>
+
+                    <p>
+                        ❤️ Vida:
+                        <b id="heroHpText">100/100</b>
+                    </p>
+
+                    <p>
+                        🛡️ Defesa:
+                        <b id="defense">0</b>
+                    </p>
+
+                </div>
+
+
+                <div class="equipment">
+
+                    <h3>🎒 Equipamentos</h3>
+
+                    <div class="equip-grid">
+
+                        <button class="equip-slot">
+
+                            ⚔️
+
+                            <small>
+                                Arma
+                            </small>
+
+                            <b id="weaponName">
+                                Vazio
+                            </b>
+
+                        </button>
+
+
+                        <button class="equip-slot">
+
+                            🛡️
+
+                            <small>
+                                Armadura
+                            </small>
+
+                            <b id="armorName">
+                                Vazio
+                            </b>
+
+                        </button>
+
+
+                        <button class="equip-slot">
+
+                            💍
+
+                            <small>
+                                Anel
+                            </small>
+
+                            <b id="ringName">
+                                Vazio
+                            </b>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="battle panel">
+
+            <div class="character">
+
+                <div class="emoji">
+                    🧙
+                </div>
+
+                <h2>
+                    Herói
+                </h2>
+
+                <div class="bar">
+
+                    <div
+                        id="playerHealth"
+                        class="health">
+                    </div>
+
+                </div>
+
+                <p>
+
+                    ❤️
+
+                    <span id="playerHp">
+                        100
+                    </span>
+
+                    /
+
+                    <span id="playerMaxHp">
+                        100
+                    </span>
+
+                </p>
+
+            </div>
+
+
+            <div class="vs">
+                ⚔️
+            </div>
+
+
+            <div class="enemy">
+
+                <div
+                    class="emoji"
+                    id="enemyEmoji">
+
+                    👹
+
+                </div>
+
+                <h2 id="enemyName">
+                    Goblin
+                </h2>
+
+                <div class="bar">
+
+                    <div
+                        id="enemyHealth"
+                        class="health">
+                    </div>
+
+                </div>
+
+                <p>
+
+                    ❤️
+
+                    <span id="enemyHp">
+                        50
+                    </span>
+
+                    /
+
+                    <span id="enemyMaxHp">
+                        50
+                    </span>
+
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <section class="actions panel">
+
+            <button
+                id="startButton"
+                class="primary">
+
+                ⚔️ Iniciar batalha
+
+            </button>
+
+
+            <button id="autoButton">
+
+                🤖 Auto: OFF
+
+            </button>
+
+        </section>
+
+
+        <div
+            id="message"
+            class="message">
+
+            Prepare-se para a batalha!
+
+        </div>
+
+
+        <section class="panel">
+
+            <h2>
+                🎒 Inventário
+            </h2>
+
+            <div
+                id="inventory"
+                class="inventory">
+
+            </div>
+
+        </section>
+
+
+        <section class="panel">
+
+            <h2>
+                🏪 Loja
+            </h2>
+
+            <div
+                id="shop"
+                class="shop">
+
+            </div>
+
+        </section>
+
+
+        <section class="panel">
+
+            <h2>
+                💤 Recompensa offline
+            </h2>
+
+            <p id="offlineText">
+
+                Feche e abra o jogo
+                para testar.
+
+            </p>
+
+        </section>
+
+
+        <section class="panel">
+
+            <h2>
+                🗺️ Progresso
+            </h2>
+
+            <div class="progress-wrap">
+
+                <div
+                    id="xpBar"
+                    class="health">
+                </div>
+
+            </div>
+
+            <p>
+
+                XP para o próximo nível:
+
+                <b id="xpNeeded">
+                    100
+                </b>
+
+            </p>
+
+        </section>
+
+
+        <footer>
+
+            <button
+                id="resetButton"
+                class="danger">
+
+                🗑️ Apagar progresso
+
+            </button>
+
+        </footer>
 
     </div>
 
-  </section>
 
-
-  <section class="battle panel">
-
-    <div class="character">
-
-      <div class="emoji">
-        🧙
-      </div>
-
-      <h2>Herói</h2>
-
-      <div class="bar">
-        <div id="playerHealth" class="health"></div>
-      </div>
-
-      <p>
-        ❤️
-        <span id="playerHp">100</span> /
-        <span id="playerMaxHp">100</span>
-      </p>
-
-    </div>
-
-
-    <div class="vs">
-      ⚔️
-    </div>
-
-
-    <div class="enemy">
-
-      <div class="emoji" id="enemyEmoji">
-        👹
-      </div>
-
-      <h2 id="enemyName">
-        Goblin
-      </h2>
-
-      <div class="bar">
-        <div id="enemyHealth" class="health"></div>
-      </div>
-
-      <p>
-        ❤️
-        <span id="enemyHp">50</span> /
-        <span id="enemyMaxHp">50</span>
-      </p>
-
-    </div>
-
-  </section>
-
-
-  <section class="actions panel">
-
-    <button id="startButton" class="primary">
-      ⚔️ Iniciar batalha
-    </button>
-
-    <button id="autoButton">
-      🤖 Auto: OFF
-    </button>
-
-  </section>
-
-
-  <div id="message" class="message">
-    Prepare-se para a batalha!
-  </div>
-
-
-  <section class="panel">
-
-    <h2>🎒 Inventário</h2>
-
-    <div id="inventory" class="inventory"></div>
-
-  </section>
-
-
-  <section class="panel">
-
-    <h2>🏪 Loja</h2>
-
-    <div id="shop" class="shop"></div>
-
-  </section>
-
-
-  <section class="panel">
-
-    <h2>💤 Recompensa offline</h2>
-
-    <p id="offlineText">
-      Feche e abra o jogo para testar.
-    </p>
-
-  </section>
-
-
-  <section class="panel">
-
-    <h2>🗺️ Progresso</h2>
-
-    <div class="progress-wrap">
-      <div id="xpBar" class="health"></div>
-    </div>
-
-    <p>
-      XP para o próximo nível:
-      <b id="xpNeeded">100</b>
-    </p>
-
-  </section>
-
-
-  <footer>
-
-    <button id="resetButton" class="danger">
-      🗑️ Apagar progresso
-    </button>
-
-  </footer>
-
-</div>
-
-
-<script src="game.js"></script>
+    <script src="game.js"></script>
 
 </body>
+
 </html>
